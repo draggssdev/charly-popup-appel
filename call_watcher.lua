@@ -7,8 +7,28 @@
 ------------------------------------------------------------
 -- CONFIG
 ------------------------------------------------------------
-local LOOKUP_URL    = "https://charly-popup-appel.onrender.com/lookup"
-local LOOKUP_TOKEN  = "6c0bd521489f79c439560a8b144eac14358eec1d5ff5b117fe8c2c80d6932f46"
+local LOOKUP_URL = "https://charly-popup-appel.onrender.com/lookup"
+
+-- Le bearer token est lu depuis le macOS Keychain (pas hardcodé ici).
+-- Il est saisi par le consultant lors de l'install (cf. install.sh).
+local function readKeychainToken()
+    local user = os.getenv("USER") or "default"
+    local cmd = string.format(
+        "security find-generic-password -s charly-popup-appel -a %q -w 2>/dev/null",
+        user
+    )
+    local handle = io.popen(cmd)
+    if not handle then return nil end
+    local token = handle:read("*l")
+    handle:close()
+    if token and token ~= "" then return token end
+    return nil
+end
+
+local LOOKUP_TOKEN = readKeychainToken()
+if not LOOKUP_TOKEN then
+    hs.alert.show("popup-appel : bearer token manquant. Relance install.sh.", 5)
+end
 
 local POPUP_WIDTH       = 380
 local POPUP_HEIGHT      = 280
