@@ -39,7 +39,9 @@ echo ""
 echo "Colle le bearer token Charly que t'a transmis l'admin"
 echo "(la saisie est cachée pour des raisons de sécurité) :"
 echo ""
-read -s -p "  Token : " TOKEN
+# /dev/tty force la lecture depuis le clavier même quand le script tourne
+# via 'curl | bash' (sinon read lit depuis le pipe curl, pas le clavier).
+read -s -p "  Token : " TOKEN < /dev/tty
 echo ""
 if [ -z "$TOKEN" ]; then
     echo "✗ Token vide, annulation."
