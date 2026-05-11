@@ -698,15 +698,18 @@ end
 local function handleIncomingCall(call)
     log("Appel entrant détecté :", call.address)
     local got_response = false
-    -- N'affiche le LOADING que si la réponse met >800ms (sinon on évite
-    -- un flash inutile et on n'a qu'une seule animation slide).
-    hs.timer.doAfter(0.8, function()
+    local t0 = hs.timer.absoluteTime()
+    -- LOADING n'apparaît que si la réponse met >1.5s (cas cold start Render).
+    -- En usage normal (<1s), on saute direct à la popup pleine, pas de flash.
+    hs.timer.doAfter(1.5, function()
         if not got_response and activePopup == nil then
             renderPopup(call.address, nil)
         end
     end)
     lookupContact(call.address, function(info)
         got_response = true
+        local elapsed = (hs.timer.absoluteTime() - t0) / 1e9
+        log(string.format("lookup terminé en %.2fs", elapsed))
         renderPopup(call.address, info)
     end)
 end
